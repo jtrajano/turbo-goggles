@@ -1,4 +1,4 @@
-﻿using InventoryManagement.Domain;
+﻿using InventoryManagement.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Infrastructure.Persistence;
@@ -9,8 +9,9 @@ public class ApplicationDbContext : DbContext
     {
         
     }
-
+    public DbSet<User> Users { get; set; }
     public DbSet<Product> Products { get; set; }
+
 
     override protected void OnModelCreating(ModelBuilder modelBuilder)
     {

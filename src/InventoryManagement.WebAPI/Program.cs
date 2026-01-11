@@ -1,6 +1,6 @@
 using InventoryManagement.Application;
 using InventoryManagement.Infrastructure;
-using InventoryManagement.WebAPI;
+using InventoryManagement.WebAPI.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,5 +1,6 @@
 ﻿using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain;
+using InventoryManagement.Domain.Entities;
 using MediatR;
 
 namespace InventoryManagement.Application;
@@ -8,8 +9,8 @@ public record GetAllProductsQuery : IRequest<IEnumerable<ProductDto>>;
 
 public class GetAllProductsQueryHandler: IRequestHandler<GetAllProductsQuery, IEnumerable<ProductDto>>
 {
-    private readonly IProductRepository _productRepository;
-    public GetAllProductsQueryHandler(IProductRepository productRepository)
+    private readonly IRepository<Product> _productRepository;
+    public GetAllProductsQueryHandler(IRepository<Product> productRepository)
     {
         _productRepository = productRepository;
     }

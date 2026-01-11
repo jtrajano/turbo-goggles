@@ -1,5 +1,6 @@
 ﻿using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain;
+using InventoryManagement.Domain.Entities;
 using MediatR;
 
 namespace InventoryManagement.Application;
@@ -13,8 +14,8 @@ public record CreateProductCommand(
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result>
 {
-    private readonly IProductRepository _productRepository;
-    public CreateProductCommandHandler(IProductRepository productRepository)
+    private readonly IRepository<Product> _productRepository;
+    public CreateProductCommandHandler(IRepository<Product> productRepository)
     {
         _productRepository = productRepository;
     }
@@ -24,6 +25,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         {
             var product = Product.Create(request.Name, request.Description, request.Price, request.Stock);
             await _productRepository.AddAsync(product, cancellationToken);
+            await _productRepository.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
         catch (Exception ex)

@@ -1,46 +1,25 @@
 ﻿using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Domain;
+using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace InventoryManagement.Infrastructure;
+namespace InventoryManagement.Infrastructure.Repositories;
 
-public class ProductRepository(ApplicationDbContext _context) : IProductRepository
+public class ProductRepository : Repository<Product>, IProductRepository
 {
-    public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public ProductRepository(ApplicationDbContext context) : base(context)
     {
-        return await _context.Products.FindAsync(new object[] { id }, cancellationToken);
+        
     }
-
-    public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Product>> SearchProductByText(string text)
     {
-        return await _context.Products.ToListAsync(cancellationToken);
-    }
-
-    public async Task AddAsync(Product product, CancellationToken cancellationToken = default)
-    {
-        await _context.Products.AddAsync(product, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task UpdateAsync(Product product, CancellationToken cancellationToken = default)
-    {
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var product = await GetByIdAsync(id, cancellationToken);
-        if (product != null)
-        {
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-    }
-
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _context.Products.AnyAsync(p => p.Id == id, cancellationToken);
+        text = text?.Trim().ToLower() ?? string.Empty;
+        return await _db.AsNoTracking()
+            .Where( p=>p.Name.ToLower().Contains(text) || p.Description.ToLower().Contains(text)).ToListAsync();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain;
+using InventoryManagement.Domain.Entities;
 using MediatR;
 
 namespace InventoryManagement.Application;
@@ -14,9 +15,9 @@ public record UpdateProductCommand(
 
 public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result>
 {
-    private readonly IProductRepository _repository;
+    private readonly IRepository<Product> _repository;
 
-    public UpdateProductHandler(IProductRepository repository)
+    public UpdateProductHandler(IRepository<Product> repository)
     {
         _repository = repository;
     }
@@ -32,6 +33,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result
         {
             product.Update(request.Name, request.Description, request.Price, request.Stock);
             await _repository.UpdateAsync(product, cancellationToken);
+            await _repository.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
         catch (ArgumentException ex)

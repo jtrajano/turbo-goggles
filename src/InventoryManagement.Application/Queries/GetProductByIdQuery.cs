@@ -1,15 +1,19 @@
 ﻿using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Application.Mapping;
 using InventoryManagement.Domain;
+using InventoryManagement.Domain.Entities;
 using MediatR;
 
 namespace InventoryManagement.Application;
 
 public record GetProductByIdQuery(Guid Id) : IRequest<ProductDto?>;
 
+
+
 public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, ProductDto?>
 {
-    private readonly IProductRepository _productRepository;
-    public GetProductByIdQueryHandler(IProductRepository productRepository)
+    private readonly IRepository<Product> _productRepository;
+    public GetProductByIdQueryHandler(IRepository<Product> productRepository)
     {
         _productRepository = productRepository;
     }
@@ -18,14 +22,6 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, P
         var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
         if (product == null)
             return null;
-        return new ProductDto(
-            product.Id,
-            product.Name,
-            product.Description,
-            product.Price,
-            product.Stock,
-            product.CreatedAt,
-            product.UpdatedAt
-        );
+        return product.ToDto();
     }
 }

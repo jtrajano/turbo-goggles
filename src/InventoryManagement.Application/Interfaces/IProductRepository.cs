@@ -1,13 +1,13 @@
-﻿using InventoryManagement.Domain;
+﻿using InventoryManagement.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace InventoryManagement.Application.Interfaces;
 
 public interface IProductRepository
 {
-    Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task AddAsync(Product product, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Product product, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Product>> SearchProductByText(string text);
 }

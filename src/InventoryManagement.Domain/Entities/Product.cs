@@ -1,6 +1,6 @@
-﻿namespace InventoryManagement.Domain;
+﻿namespace InventoryManagement.Domain.Entities;
 
-public class Product
+public class Product : IBaseEntity
 {
     private  Product()
     {
