@@ -17,6 +17,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         text = text?.Trim().ToLower() ?? string.Empty;
         return await _db.AsNoTracking()
-            .Where(p => p.Username.ToLower().Contains(text) || p.Email.ToLower().Contains(text)).ToListAsync();
+            .Where(p => p.FirstName.ToLower().Contains(text) 
+            || p.LastName.ToLower().Contains(text)
+            || p.Email.ToLower().Contains(text)).ToListAsync();
     }
 }

@@ -8,7 +8,7 @@ namespace InventoryManagement.Application.DTOs;
 
 public record UserDto(
     Guid Id,
-    string Username,
+    string Name,
     string Status,
     string Role,
     string Email,

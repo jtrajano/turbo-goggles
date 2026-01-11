@@ -14,7 +14,7 @@ public static class UserMapping
     {
         return new UserDto(
             user.Id,
-            user.Username,
+            $"{user.FirstName} {user.LastName}",
             user.Status,
             user.Role,
             user.Email,
