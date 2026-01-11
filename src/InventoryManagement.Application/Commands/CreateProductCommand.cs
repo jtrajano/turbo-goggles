@@ -14,8 +14,8 @@ public record CreateProductCommand(
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result>
 {
-    private readonly IRepository<Product> _productRepository;
-    public CreateProductCommandHandler(IRepository<Product> productRepository)
+    private readonly IProductRepository _productRepository;
+    public CreateProductCommandHandler(IProductRepository productRepository)
     {
         _productRepository = productRepository;
     }

@@ -3,14 +3,14 @@ using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace InventoryManagement.Infrastructure;
+namespace InventoryManagement.Infrastructure.Repositories.Base;
 
-public class Repository<T>() : IRepository<T> where T : class, IBaseEntity
+public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
 {
     private ApplicationDbContext _context;
     protected DbSet<T> _db;
 
-    public Repository(ApplicationDbContext context): this()
+    public BaseRepository(ApplicationDbContext context): this()
     {
         _context = context;
         _db = _context.Set<T>();
@@ -22,7 +22,7 @@ public class Repository<T>() : IRepository<T> where T : class, IBaseEntity
 
     public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _db.ToListAsync(cancellationToken);
+        return await _db.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)

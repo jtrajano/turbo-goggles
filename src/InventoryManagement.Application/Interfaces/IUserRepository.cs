@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace InventoryManagement.Application.Interfaces;
 
-public interface IProductRepository : IRepository<Product>
+public interface IUserRepository : IRepository<User>
 {
-    Task<IEnumerable<Product>> SearchByText(string text);
+    Task<IEnumerable<User>> SearchByText(string text);
 }

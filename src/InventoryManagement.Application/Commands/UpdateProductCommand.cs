@@ -15,9 +15,9 @@ public record UpdateProductCommand(
 
 public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result>
 {
-    private readonly IRepository<Product> _repository;
+    private readonly IProductRepository _repository;
 
-    public UpdateProductHandler(IRepository<Product> repository)
+    public UpdateProductHandler(IProductRepository repository)
     {
         _repository = repository;
     }
