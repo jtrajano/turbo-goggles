@@ -13,83 +13,32 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Search, Package } from "lucide-react";
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  sku: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { useProductsPage } from "@/hooks/useProducts";
 
 // Mock data for products
-const mockProducts: Product[] = Array.from({ length: 48 }, (_, i) => ({
-  id: i + 1,
-  name: [
-    "Wireless Bluetooth Headphones",
-    "Ergonomic Office Chair",
-    "Smart Watch Pro",
-    "Portable Power Bank",
-    "USB-C Hub Adapter",
-    "Mechanical Keyboard",
-    "4K Webcam",
-    "Noise Canceling Earbuds",
-    "LED Desk Lamp",
-    "Laptop Stand",
-    "External SSD 1TB",
-    "Wireless Mouse",
-  ][i % 12],
-  description: [
-    "Premium sound quality with 40-hour battery life and comfortable over-ear design.",
-    "Fully adjustable with lumbar support, breathable mesh back, and armrests.",
-    "Track fitness, receive notifications, and monitor health metrics all day.",
-    "20,000mAh capacity with fast charging support for all devices.",
-    "7-in-1 hub with HDMI, USB-A, SD card reader, and PD charging.",
-    "RGB backlit keys with hot-swappable switches and aluminum frame.",
-    "Ultra HD resolution with auto-focus and built-in noise-canceling mic.",
-    "True wireless with ANC, transparency mode, and 8-hour playback.",
-    "Adjustable brightness and color temperature with USB charging port.",
-    "Aluminum construction with adjustable height and angle for ergonomics.",
-    "NVMe speeds up to 1050MB/s with shock-resistant design.",
-    "Silent clicks with precision tracking and long battery life.",
-  ][i % 12],
-  sku: `SKU-${String(i + 1).padStart(5, "0")}`,
-  price: [79.99, 299.99, 249.99, 49.99, 39.99, 129.99, 89.99, 149.99, 34.99, 59.99, 119.99, 29.99][i % 12],
-  quantity: Math.floor(Math.random() * 200) + 1,
-  image: `https://images.unsplash.com/photo-${[
-    "1505740420928-5e560c06d30e",
-    "1580480055273-228ff5388ef8",
-    "1523275335684-37898b6baf30",
-    "1609091839311-d5365f9ff1c5",
-    "1625723044792-44de16ccb4e9",
-    "1587829741301-dc798b83add3",
-    "1516035069371-29a1b244cc32",
-    "1590658268037-6bf12165a8df",
-    "1507003211169-0a1dd7228f2d",
-    "1527864550417-7fd91fc51a46",
-    "1531492746076-161ca9f3f3cd",
-    "1527814050087-3793815479db",
-  ][i % 12]}?w=400&h=400&fit=crop`,
-}));
 
-const ITEMS_PER_PAGE = 8;
+
+const ITEMS_PER_PAGE = 12;
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const filteredProducts = mockProducts.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  // Fetch users with React Query
+  
+  // const filteredProducts = mockProducts.filter(
+  //   (product) =>
+  //     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //   product.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+    
+    //const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    
+  const { data: pagedResult, isLoading, error, isError } 
+    = useProductsPage(searchQuery, currentPage, ITEMS_PER_PAGE);
+  const paginatedProducts = pagedResult?.items || [];
+  const totalPages = Math.ceil((pagedResult?.totalCount || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -127,7 +76,7 @@ export default function ProductsPage() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Products</h1>
             <p className="text-muted-foreground">
-              Manage your product inventory ({filteredProducts.length} products)
+              Manage your product inventory ({pagedResult?.totalCount || 0} products)
             </p>
           </div>
           <Button className="gap-2">
@@ -150,16 +99,33 @@ export default function ProductsPage() {
           />
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+            <p className="mt-4 text-muted-foreground">Loading products...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="text-center py-12">
+            <Package className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground">Error loading products</h3>
+            <p className="text-muted-foreground">{error?.message || "Failed to fetch products"}</p>
+          </div>
+        )}
+
         {/* Products Grid */}
-        {paginatedProducts.length > 0 ? (
+        {!isLoading && !isError && paginatedProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {paginatedProducts.map((product) => {
-              const stockStatus = getStockStatus(product.quantity);
+              const stockStatus = getStockStatus(product.stock);
               return (
                 <Card key={product.id} className="card-hover overflow-hidden">
                   <div className="aspect-[4/3] relative bg-muted">
                     <img
-                      src={product.image}
+                      src={product.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -188,7 +154,7 @@ export default function ProductsPage() {
                         ${product.price.toFixed(2)}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
-                        Qty: {product.quantity}
+                        Qty: {product.stock}
                       </span>
                     </div>
                   </CardContent>
@@ -196,7 +162,10 @@ export default function ProductsPage() {
               );
             })}
           </div>
-        ) : (
+        ) : null}
+
+        {/* No Results */}
+        {!isLoading && !isError && paginatedProducts.length === 0 && (
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground">No products found</h3>
@@ -210,8 +179,8 @@ export default function ProductsPage() {
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
             <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)} of{" "}
-              {filteredProducts.length} products
+              Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, pagedResult?.totalCount || 0)} of{" "}
+              {pagedResult?.totalCount || 0} products
             </p>
             <Pagination>
               <PaginationContent>

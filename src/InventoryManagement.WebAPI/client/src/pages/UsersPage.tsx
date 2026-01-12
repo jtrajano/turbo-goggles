@@ -37,7 +37,7 @@ export default function UsersPage() {
   // Delete mutation
   const deleteUserMutation = useDeleteUser();
 
-  const handleDeleteUser = async (id: number) => {
+  const handleDeleteUser = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
     
     deleteUserMutation.mutate(id, {

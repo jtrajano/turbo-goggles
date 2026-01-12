@@ -2,6 +2,8 @@
 using InventoryManagement.Domain.Entities;
 using InventoryManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq.Expressions;
 
 namespace InventoryManagement.Infrastructure.Repositories.Base;
 
@@ -53,5 +55,20 @@ public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
     public async Task<int>  SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<(IReadOnlyList<T> items, int totalCount)> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        Expression<Func<T, bool>>? filter,
+        CancellationToken ct = default)
+    {
+        var items = await _db.AsNoTracking()
+            .Where(filter ?? (_ => true))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize).ToListAsync(ct);
+        var totalCount = await _db.CountAsync(ct);
+
+        return (items, totalCount);
     }
 }

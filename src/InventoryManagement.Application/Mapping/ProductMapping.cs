@@ -1,9 +1,4 @@
 ﻿using InventoryManagement.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Application.Mapping;
 
@@ -17,6 +12,7 @@ public static class ProductMapping
              product.Description,
              product.Price,
              product.Stock,
+             product.ImageUrl ?? string.Empty,
              product.CreatedAt,
              product.UpdatedAt
          );

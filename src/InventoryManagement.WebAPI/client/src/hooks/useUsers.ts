@@ -8,7 +8,7 @@ export const userKeys = {
   lists: () => [...userKeys.all, 'list'] as const,
   list: (filters?: string) => [...userKeys.lists(), { filters }] as const,
   details: () => [...userKeys.all, 'detail'] as const,
-  detail: (id: number) => [...userKeys.details(), id] as const,
+  detail: (id: string) => [...userKeys.details(), id] as const,
 };
 
 // Fetch all users
@@ -20,7 +20,7 @@ export function useUsers() {
 }
 
 // Fetch single user
-export function useUser(id: number) {
+export function useUser(id: string) {
   return useQuery({
     queryKey: userKeys.detail(id),
     queryFn: () => usersApi.getById(id),
@@ -46,7 +46,7 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) => 
       usersApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });

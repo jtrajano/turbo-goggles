@@ -6,16 +6,16 @@ import { Search } from 'lucide-react';
 
 export const usersApi = {
     getAll: () => apiRequest<User[]>('/users'),
-    getById: (id: number) => apiRequest<User>(`/users/${id}`),
+    getById: (id: string) => apiRequest<User>(`/users/${id}`),
     create: (user: Omit<User, 'id'>) => apiRequest<User>('/users', {
         method: 'POST',
         body: JSON.stringify(user),
     }),
-    update: (id: number, user: Partial<User>) => apiRequest<User>(`/users/${id}`, {
+    update: (id: string, user: Partial<User>) => apiRequest<User>(`/users/${id}`, {
         method: 'PUT',
         body: JSON.stringify(user),
     }),
-    delete: (id: number) => apiRequest<void>(`/users/${id}`, {
+    delete: (id: string) => apiRequest<void>(`/users/${id}`, {
         method: 'DELETE',
     }),
 };

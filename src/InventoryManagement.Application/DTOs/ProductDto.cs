@@ -6,6 +6,7 @@ public record ProductDto(
     string Description,
     decimal Price,
     int Stock,
+    string imageUrl,
     DateTime CreatedAt,
     DateTime? UpdatedAt
 );

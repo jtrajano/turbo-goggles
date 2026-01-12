@@ -1,11 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Design;
 using InventoryManagement.Domain.Entities;
 
 namespace InventoryManagement.Infrastructure.Persistence.Configurations;
@@ -34,6 +28,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.CreatedAt)
             .IsRequired();
+
+        builder.Property(p => p.UpdatedAt)
+            .IsRequired();
+
+        builder.Property(p => p.ImageUrl)
+            .HasMaxLength(200);
 
         builder.HasIndex(p => p.Name);
     }

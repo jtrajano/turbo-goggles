@@ -9,8 +9,17 @@ export const productKeys = {
   list: (filters?: string) => [...productKeys.lists(), { filters }] as const,
   details: () => [...productKeys.all, 'detail'] as const,
   detail: (id: number) => [...productKeys.details(), id] as const,
+  paging: (filter: string, pageNumber: number, pageSize: number) => 
+    [...productKeys.all, 'paging', { filter, pageNumber, pageSize }] as const
 };
 
+
+export function useProductsPage(filter: string, pageNumber: number, pageSize: number) {
+  return useQuery({
+    queryKey: productKeys.paging(filter, pageNumber, pageSize),
+    queryFn: ()=> productsApi.getPaging(filter, pageNumber, pageSize),
+  });
+}
 // Fetch all products
 export function useProducts() {
   return useQuery({

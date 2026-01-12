@@ -1,8 +1,5 @@
-﻿using InventoryManagement.Application;
-using InventoryManagement.Application.Queries;
-using InventoryManagement.Application.Queries.Products;
+﻿using InventoryManagement.Application.Queries.Products;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.WebAPI.Endpoints;
@@ -34,11 +31,13 @@ public static class ProductApis
         });
 
 
+        grp.MapGet("/paging", async (
+            [AsParameters] PageRequest param,
+            [FromServices] ISender sender) =>
+        {
+            var result = await sender.Send(new GetPagedQuery(param));
+            return Results.Ok(result);
+        });
 
     }
-
-
-
-
-
 }

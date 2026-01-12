@@ -1,4 +1,5 @@
 ﻿using InventoryManagement.Domain.Entities;
+using System.Linq.Expressions;
 
 namespace InventoryManagement.Application.Interfaces;
 
@@ -10,5 +11,7 @@ public interface IRepository<T> where T : class, IBaseEntity
     Task UpdateAsync(T product, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<T> items, int totalCount)> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? filter, CancellationToken ct = default);  
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
