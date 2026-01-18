@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AdminLayout } from "@/components/layout/AdminLayout";
+ 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,17 +23,7 @@ const ITEMS_PER_PAGE = 12;
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  // Fetch users with React Query
-  
-  // const filteredProducts = mockProducts.filter(
-  //   (product) =>
-  //     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-    
-    //const paginatedProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    
+
   const { data: pagedResult, isLoading, error, isError } 
     = useProductsPage(searchQuery, currentPage, ITEMS_PER_PAGE);
   const paginatedProducts = pagedResult?.items || [];
@@ -69,7 +59,6 @@ export default function ProductsPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -221,6 +210,5 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }
