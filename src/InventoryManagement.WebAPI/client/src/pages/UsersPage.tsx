@@ -10,12 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUsers, useDeleteUser, useUsersPage } from "@/hooks/useUsers";
 import { useToast } from "@/hooks/use-toast";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import Counter from "@/components/Counter";
+import { useDeleteUserMutation, useGetUsersQuery } from "@/services/usersApi";
+import PagingBar from "@/components/PagingBar";
 
 const roleStyles: Record<string, string> = {
   Admin: "bg-primary/10 text-primary",
@@ -29,73 +30,48 @@ const statusStyles: Record<string, string> = {
   pending: "bg-warning/10 text-warning",
 };
 
-const ITEMS_PER_PAGE = 12;
+
+const ITEMS_PER_PAGE = 6;
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: pagedResult, isLoading, error, isError } =
-     useUsersPage(searchQuery, currentPage, ITEMS_PER_PAGE);
-
-  const paginatedUsers = pagedResult?.items || [];
-  const totalPages = Math.round(Math.ceil((pagedResult?.totalCount || 0)) / ITEMS_PER_PAGE);
-  const startIndex = (currentPage -1 ) * ITEMS_PER_PAGE;
-  const handlePageChange = (page: number)=>{
-    if(page >= 1 && page <= totalPages){
-      setCurrentPage(page);
+    useGetUsersQuery({ filter: searchQuery, pageNumber: currentPage, pageSize: ITEMS_PER_PAGE});
+  
+  // Delete mutation
+  const [deleteUser] = useDeleteUserMutation();
+  const handleDeleteUser = async(id: string)=>{
+    if(!confirm('Are you sure?')) return;
+    try {
+      await deleteUser(id).unwrap();
+      toast({title: 'User deleted'});
+    } catch (err) {
+      toast({
+        title: 'Delete failed',
+        description: (err).message, 
+        variant: 'destructive'
+      });
     }
   }
 
-  const getPageNumbers =() =>{
-    const pages: (number | string)[] = [];
-    if(totalPages <= 5) {
-      for(let i = 1; i <= totalPages; i++) pages.push(i);
-    }
-    else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
-      }
-    }
-    return pages;
-  };
+  const paginatedUsers = pagedResult?.items || [];
+  const totalPages = Math.round(Math.ceil((pagedResult?.totalCount || 0)) / ITEMS_PER_PAGE);
+
+
+
 
 
   const { toast } = useToast();
   
   // Fetch users with React Query
   
-  // Delete mutation
-  const deleteUserMutation = useDeleteUser();
-
-  const handleDeleteUser = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-    
-    deleteUserMutation.mutate(id, {
-      onSuccess: () => {
-        toast({
-          title: "User deleted",
-          description: "The user has been successfully removed.",
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to delete user",
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
+ 
+ 
   
   return (
       <div className="space-y-6">
-        <Counter/>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -210,53 +186,19 @@ export default function UsersPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, pagedResult?.totalCount || 0)} of{" "}
-              {pagedResult?.totalCount || 0} products
-            </p>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                {getPageNumbers().map((page, index) => (
-                  <PaginationItem key={index} className="hidden sm:block">
-                    {page === "..." ? (
-                      <span className="px-3 py-2">...</span>
-                    ) : (
-                      <PaginationLink
-                        onClick={() => handlePageChange(page as number)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-                <PaginationItem className="sm:hidden">
-                  <span className="px-3 py-2 text-sm">
-                    {currentPage} / {totalPages}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        
+          <PagingBar
+            currentPage={currentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            totalCount={pagedResult?.totalCount} 
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}  
+          />
+          
+        
+     </div>
 
 
-
-      </div>
+   
   );
 }
