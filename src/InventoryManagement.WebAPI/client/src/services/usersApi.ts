@@ -14,17 +14,14 @@ export const usersApi = createApi({
         ({
             query: ({ filter='', pageNumber=1, pageSize= 12})=> `/users/paging?filter=${encodeURIComponent(filter)}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
             providesTags: (result) => 
-            {
-                console.log(result);
-                
-                return result 
+                result 
                 ?[...result.items.map(
                         ({id})=>({type: 'Users' as const, id})
                     ),
                     { type: 'Users', id: 'LIST'}
                 ]
                 :[{type: 'Users', id: 'LIST'}]
-            }
+            
         }),
         deleteUser: build.mutation<void, string>({
             query: (id) => ({ url: `/users/${id}`, method: 'DELETE' }),

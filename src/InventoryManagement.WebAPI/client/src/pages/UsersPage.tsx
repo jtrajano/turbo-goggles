@@ -57,18 +57,8 @@ export default function UsersPage() {
   }
 
   const paginatedUsers = pagedResult?.items || [];
-  const totalPages = Math.round(Math.ceil((pagedResult?.totalCount || 0)) / ITEMS_PER_PAGE);
-
-
-
-
-
+  const totalPages = Math.ceil((pagedResult?.totalCount || 0) / ITEMS_PER_PAGE);
   const { toast } = useToast();
-  
-  // Fetch users with React Query
-  
- 
- 
   
   return (
       <div className="space-y-6">
@@ -91,7 +81,10 @@ export default function UsersPage() {
             placeholder="Search users..." 
             className="pl-10"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
 
