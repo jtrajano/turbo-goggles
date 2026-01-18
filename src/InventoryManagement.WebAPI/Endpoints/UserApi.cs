@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Application.Queries.Users;
+﻿
+using InventoryManagement.Application.Queries.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,6 +32,13 @@ public static class UserApi
             return Results.Ok(result);
         });
 
+        grp.MapGet("/paging", async (
+            [AsParameters] PageRequest param,
+            [FromServices] ISender sender) =>
+        {
+            var result = await sender.Send(new GetPagedQuery(param));
+            return Results.Ok(result);
+        });
 
 
     }

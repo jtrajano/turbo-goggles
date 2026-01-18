@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/layout/AdminLayout";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useMemo } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useUsers, useDeleteUser } from "@/hooks/useUsers";
+import { useUsers, useDeleteUser, useUsersPage } from "@/hooks/useUsers";
 import { useToast } from "@/hooks/use-toast";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import Counter from "@/components/Counter";
 
 const roleStyles: Record<string, string> = {
   Admin: "bg-primary/10 text-primary",
@@ -27,12 +29,45 @@ const statusStyles: Record<string, string> = {
   pending: "bg-warning/10 text-warning",
 };
 
+const ITEMS_PER_PAGE = 12;
+
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data: pagedResult, isLoading, error, isError } =
+     useUsersPage(searchQuery, currentPage, ITEMS_PER_PAGE);
+
+  const paginatedUsers = pagedResult?.items || [];
+  const totalPages = Math.round(Math.ceil((pagedResult?.totalCount || 0)) / ITEMS_PER_PAGE);
+  const startIndex = (currentPage -1 ) * ITEMS_PER_PAGE;
+  const handlePageChange = (page: number)=>{
+    if(page >= 1 && page <= totalPages){
+      setCurrentPage(page);
+    }
+  }
+
+  const getPageNumbers =() =>{
+    const pages: (number | string)[] = [];
+    if(totalPages <= 5) {
+      for(let i = 1; i <= totalPages; i++) pages.push(i);
+    }
+    else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, "...", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  };
+
+
   const { toast } = useToast();
   
   // Fetch users with React Query
-  const { data: users = [], isLoading, error, isError } = useUsers();
   
   // Delete mutation
   const deleteUserMutation = useDeleteUser();
@@ -57,15 +92,10 @@ export default function UsersPage() {
     });
   };
 
-  const filteredUsers = useMemo(() => {
-    return users.filter(user =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [users, searchQuery]);
+  
   return (
-    <AdminLayout>
       <div className="space-y-6">
+        <Counter/>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -106,7 +136,7 @@ export default function UsersPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && !isError && filteredUsers.length === 0 && (
+        {!isLoading && !isError && paginatedUsers.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               {searchQuery ? "No users found matching your search." : "No users found."}
@@ -115,9 +145,9 @@ export default function UsersPage() {
         )}
 
         {/* Users Grid */}
-        {!isLoading && !isError && filteredUsers.length > 0 && (
+        {!isLoading && !isError && paginatedUsers.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
             <div
               key={user.id}
               className="bg-card rounded-xl border p-6 card-hover animate-fade-in"
@@ -178,7 +208,55 @@ export default function UsersPage() {
             ))}
           </div>
         )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+            <p className="text-sm text-muted-foreground">
+              Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, pagedResult?.totalCount || 0)} of{" "}
+              {pagedResult?.totalCount || 0} products
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {getPageNumbers().map((page, index) => (
+                  <PaginationItem key={index} className="hidden sm:block">
+                    {page === "..." ? (
+                      <span className="px-3 py-2">...</span>
+                    ) : (
+                      <PaginationLink
+                        onClick={() => handlePageChange(page as number)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                <PaginationItem className="sm:hidden">
+                  <span className="px-3 py-2 text-sm">
+                    {currentPage} / {totalPages}
+                  </span>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+
+
+
       </div>
-    </AdminLayout>
   );
 }

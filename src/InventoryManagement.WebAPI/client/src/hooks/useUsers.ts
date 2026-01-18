@@ -9,7 +9,17 @@ export const userKeys = {
   list: (filters?: string) => [...userKeys.lists(), { filters }] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
+  paging: (filter: string, pageNumber: number, pageSize: number) => 
+    [...userKeys.all, 'paging', { filter, pageNumber, pageSize }] as const
 };
+
+export function useUsersPage(filter: string, pageNumber: number, pageSize: number) {
+  return useQuery({
+    queryKey: userKeys.paging(filter, pageNumber, pageSize),
+    queryFn: ()=> usersApi.getPaging(filter, pageNumber, pageSize),
+  });
+}
+
 
 // Fetch all users
 export function useUsers() {
