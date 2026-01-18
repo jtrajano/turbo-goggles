@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUsers, useDeleteUser, useUsersPage } from "@/hooks/useUsers";
 import { useToast } from "@/hooks/use-toast";
@@ -36,9 +36,16 @@ const ITEMS_PER_PAGE = 6;
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
   const { data: pagedResult, isLoading, error, isError } =
-    useGetUsersQuery({ filter: searchQuery, pageNumber: currentPage, pageSize: ITEMS_PER_PAGE});
+    useGetUsersQuery({ filter: debouncedSearch, pageNumber: currentPage, pageSize: ITEMS_PER_PAGE});
+
+  // debounce search input to avoid excessive API calls
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
   
   // Delete mutation
   const [deleteUser] = useDeleteUserMutation();
