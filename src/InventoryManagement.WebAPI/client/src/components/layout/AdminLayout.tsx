@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
@@ -32,7 +33,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         )}
       >
         <div className="p-4 lg:p-6">
-          {children}
+          {children ?? <Outlet />}
         </div>
       </main>
     </div>

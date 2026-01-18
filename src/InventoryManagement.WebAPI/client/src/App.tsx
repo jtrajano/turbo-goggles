@@ -8,6 +8,7 @@ import UsersPage from "./pages/UsersPage";
 import SettingsPage from "./pages/SettingsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ProductsPage from "./pages/ProductsPage";
+import { AdminLayout } from "@/components/layout/AdminLayout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -27,15 +28,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/orders" element={<Index />} />
-          <Route path="/projects" element={<Index />} />
-          <Route path="/notifications" element={<Index />} />
-          <Route path="/help" element={<Index />} />
+          <Route element={<AdminLayout />}>
+            <Route index element={<Index />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="orders" element={<Index />} />
+            <Route path="projects" element={<Index />} />
+            <Route path="notifications" element={<Index />} />
+            <Route path="help" element={<Index />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

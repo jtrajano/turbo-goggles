@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/layout/AdminLayout";
+ 
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Eye, Clock, MousePointerClick, Users } from "lucide-react";
 import {
@@ -46,7 +46,6 @@ const COLORS = ["hsl(238, 84%, 67%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)",
 
 export default function AnalyticsPage() {
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -191,6 +190,5 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

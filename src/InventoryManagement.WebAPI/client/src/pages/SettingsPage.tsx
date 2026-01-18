@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/layout/AdminLayout";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,6 @@ import { Camera } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <AdminLayout>
       <div className="max-w-2xl space-y-6">
         {/* Header */}
         <div>
@@ -110,6 +109,5 @@ export default function SettingsPage() {
           <Button>Save Changes</Button>
         </div>
       </div>
-    </AdminLayout>
   );
 }
