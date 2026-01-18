@@ -3,8 +3,8 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-export const api = createApi({
-    reducerPath : 'api',
+export const usersApi = createApi({
+    reducerPath : 'usersApi',
     baseQuery: API_BASE_URL,
     tagTypes:['Users'],
     endpoints:(build) => 
@@ -28,4 +28,4 @@ export const api = createApi({
     })
 })
 
-export const { useGetUsersQuery, useDeleteUserMutation } = api;
+export const { useGetUsersQuery, useDeleteUserMutation } = usersApi;
