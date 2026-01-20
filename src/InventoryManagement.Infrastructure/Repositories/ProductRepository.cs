@@ -17,6 +17,15 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
     {
         
     }
+
+    public Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<bool> SkuExistsAsync(string sku, Guid? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
     public async Task<IEnumerable<Product>> SearchByText(string text)
     {
         text = text?.Trim().ToLower() ?? string.Empty;

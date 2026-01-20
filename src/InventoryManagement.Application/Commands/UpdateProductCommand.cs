@@ -31,7 +31,8 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result
 
         try
         {
-            product.Update(request.Name, request.Description, request.Price, request.Stock);
+            // todo: implement update logic
+            //product.Update(request.Name, request.Description, request.Price, request.Stock);
             await _repository.UpdateAsync(product, cancellationToken);
             await _repository.SaveChangesAsync(cancellationToken);
             return Result.Success();
