@@ -1,58 +1,125 @@
-﻿namespace InventoryManagement.Domain.Entities;
-
-public class Product : IBaseEntity
+﻿// Domain/Entities/Product.cs
+namespace InventoryManagement.Domain.Entities
 {
-    private  Product()
+    public class Product : IBaseEntity
     {
-        
-    }
-    public Guid Id { get; set; }
-    public string Name  { get; set; }
-    public string  Description { get; set; }
-    public decimal Price { get; set; }
-    public string? ImageUrl { get; set; }
-    public int Stock { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+        public Guid Id { get; set; }
+        public string SKU { get; private set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
+        public string? Description { get; private set; }
+        public string Category { get; private set; } = string.Empty;
+        public string? Supplier { get; private set; }
+        public decimal UnitPrice { get; private set; }
+        public decimal CostPrice { get; private set; }
+        public int CurrentStock { get; private set; }
+        public int ReorderLevel { get; private set; }
+        public int MaxStockLevel { get; private set; }
+        public string? Unit { get; private set; }
+        public string? Barcode { get; private set; }
+        public string? ImageUrl { get; private set; }
+        public bool IsActive { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
+        public string? CreatedBy { get; private set; }
+        public string? UpdatedBy { get; private set; }
 
-    public static Product Create(string name, string description, decimal price, int stock)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name is required");
+        // Private constructor for EF Core
+        private Product() { }
 
-        if (price <= 0)
-            throw new ArgumentException("Price must be greater than zero");
-
-        return new Product
+        // Factory method for creating new products
+        public static Product Create(
+            string sku,
+            string name,
+            string category,
+            decimal unitPrice,
+            decimal costPrice,
+            int currentStock,
+            int reorderLevel,
+            int maxStockLevel,
+            string? description = null,
+            string? supplier = null,
+            string? unit = null,
+            string? barcode = null,
+            string? imageUrl = null,
+            string? createdBy = null)
         {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Description = description,
-            Price = price,
-            Stock = stock,
-            CreatedAt = DateTime.UtcNow
-        };
+            var product = new Product
+            {
+                Id = Guid.NewGuid(),
+                SKU = sku,
+                Name = name,
+                Description = description,
+                Category = category,
+                Supplier = supplier,
+                UnitPrice = unitPrice,
+                CostPrice = costPrice,
+                CurrentStock = currentStock,
+                ReorderLevel = reorderLevel,
+                MaxStockLevel = maxStockLevel,
+                Unit = unit,
+                Barcode = barcode,
+                ImageUrl = imageUrl,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+
+            return product;
+        }
+
+        // Business methods
+        public void Update(
+            string sku,
+            string name,
+            string category,
+            decimal unitPrice,
+            decimal costPrice,
+            int reorderLevel,
+            int maxStockLevel,
+            string? description = null,
+            string? supplier = null,
+            string? unit = null,
+            string? barcode = null,
+            string? imageUrl = null,
+            string? updatedBy = null)
+        {
+            SKU = sku;
+            Name = name;
+            Description = description;
+            Category = category;
+            Supplier = supplier;
+            UnitPrice = unitPrice;
+            CostPrice = costPrice;
+            ReorderLevel = reorderLevel;
+            MaxStockLevel = maxStockLevel;
+            Unit = unit;
+            Barcode = barcode;
+            ImageUrl = imageUrl;
+            UpdatedAt = DateTime.UtcNow;
+            UpdatedBy = updatedBy;
+        }
+
+        public void UpdateStock(int quantity)
+        {
+            CurrentStock = quantity;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public bool IsLowStock() => CurrentStock <= ReorderLevel;
+
+        public decimal CalculateStockValue() => CurrentStock * CostPrice;
     }
-
-    public void Update(string name, string description, decimal price, int stock)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name is required");
-
-        Name = name;
-        Description = description;
-        Price = price;
-        Stock = stock;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpdateStock(int quantity)
-    {
-        if (Stock + quantity < 0)
-            throw new InvalidOperationException("Insufficient stock");
-
-        Stock += quantity;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
 }
