@@ -12,9 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useUsers, useDeleteUser, useUsersPage } from "@/hooks/useUsers";
 import { useToast } from "@/hooks/use-toast";
-import Counter from "@/components/Counter";
 import { useDeleteUserMutation, useGetUsersQuery } from "@/services/usersApi";
 import PagingBar from "@/components/PagingBar";
 
@@ -186,14 +184,14 @@ export default function UsersPage() {
         )}
 
         {/* Pagination */}
-        
+        {
           <PagingBar
-            currentPage={currentPage}
-            itemsPerPage={ITEMS_PER_PAGE}
-            totalCount={pagedResult?.totalCount} 
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}  
-          />
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
+              totalCount={pagedResult?.totalCount} 
+              setCurrentPage={setCurrentPage}  
+            />
+        }
           
         
      </div>

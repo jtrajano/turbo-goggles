@@ -1,56 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
  
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Search, Package } from "lucide-react";
-import { useProductsPage } from "@/hooks/useProducts";
+import PagingBar from "@/components/PagingBar";
+import { useGetProductsQuery } from "@/services/productsApi";
+
 
 // Mock data for products
-
-
-const ITEMS_PER_PAGE = 12;
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const ITEMS_PER_PAGE = 8;
 
-  const { data: pagedResult, isLoading, error, isError } 
-    = useProductsPage(searchQuery, currentPage, ITEMS_PER_PAGE);
+  const { data: pagedResult, isLoading, error, isError } = 
+    useGetProductsQuery({filter: debouncedSearch,pageNumber: currentPage, pageSize: ITEMS_PER_PAGE});
+
   const paginatedProducts = pagedResult?.items || [];
-  const totalPages = Math.ceil((pagedResult?.totalCount || 0) / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
-      }
-    }
-    return pages;
-  };
+    // debounce search input to avoid excessive API calls
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
 
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return { label: "Out of Stock", variant: "destructive" as const };
@@ -101,7 +77,7 @@ export default function ProductsPage() {
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-destructive mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground">Error loading products</h3>
-            <p className="text-muted-foreground">{error?.message || "Failed to fetch products"}</p>
+            <p className="text-muted-foreground">{error && "message" in error? error.message : "Failed to fetch products"}</p>
           </div>
         )}
 
@@ -165,50 +141,12 @@ export default function ProductsPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, pagedResult?.totalCount || 0)} of{" "}
-              {pagedResult?.totalCount || 0} products
-            </p>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                {getPageNumbers().map((page, index) => (
-                  <PaginationItem key={index} className="hidden sm:block">
-                    {page === "..." ? (
-                      <span className="px-3 py-2">...</span>
-                    ) : (
-                      <PaginationLink
-                        onClick={() => handlePageChange(page as number)}
-                        isActive={currentPage === page}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-                <PaginationItem className="sm:hidden">
-                  <span className="px-3 py-2 text-sm">
-                    {currentPage} / {totalPages}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <PagingBar
+            currentPage={currentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            totalCount={pagedResult?.totalCount} 
+            setCurrentPage={setCurrentPage}  
+          />
       </div>
   );
 }

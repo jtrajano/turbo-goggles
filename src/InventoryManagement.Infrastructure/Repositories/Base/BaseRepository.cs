@@ -63,12 +63,14 @@ public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
         Expression<Func<T, bool>>? filter,
         CancellationToken ct = default)
     {
-        var items = await _db.AsNoTracking()
-            .Where(filter ?? (_ => true))
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize).ToListAsync(ct);
-        var totalCount = await _db.CountAsync(ct);
+        var query = _db.AsNoTracking()
+            .Where(filter ?? (_ => true));
 
-        return (items, totalCount);
+        var result= await query.Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize).ToListAsync(ct);
+
+        var totalCount = await query.CountAsync();
+
+        return (result, totalCount);
     }
 }

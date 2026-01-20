@@ -4,21 +4,20 @@ import { cn } from "@/lib/utils";
 
 
 export default function PagingBar(prop 
-    :{currentPage: number , totalCount: number, totalPages: number, itemsPerPage: number, setCurrentPage  }) {
+    :{currentPage: number , totalCount: number, itemsPerPage: number, setCurrentPage  }) {
     
-    const totalPage : number = prop.totalPages;
     const currentPage: number = prop.currentPage;
     const itemsPerPage : number = prop.itemsPerPage;
+    const totalPage = Math.round(Math.ceil((prop.totalCount || 0) / itemsPerPage));
     const totalCount: number = prop.totalCount;
 
     const startIndex = (currentPage -1 ) * itemsPerPage;
     const handlePageChange = (page: number)=>{
-    if(page >= 1 && page <= totalPage){
-        prop.setCurrentPage(page);
+        if(page >= 1 && page <= totalPage){
+          prop.setCurrentPage(page);
         }
     }
 
-    
     const getPageNumbers =() =>{
         const pages: (number | string)[] = [];
         if(totalPage <= 5) {
@@ -35,6 +34,9 @@ export default function PagingBar(prop
         }
         return pages;
     };
+
+    if(!totalPage)
+      return <div></div>
 
     return (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
