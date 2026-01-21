@@ -15,7 +15,6 @@ namespace InventoryManagement.Domain.Entities
         public int ReorderLevel { get; private set; }
         public int MaxStockLevel { get; private set; }
         public string? Unit { get; private set; }
-        public string? Barcode { get; private set; }
         public string? ImageUrl { get; private set; }
         public bool IsActive { get; private set; }
         public DateTime CreatedAt { get; private set; }
@@ -57,7 +56,6 @@ namespace InventoryManagement.Domain.Entities
                 ReorderLevel = reorderLevel,
                 MaxStockLevel = maxStockLevel,
                 Unit = unit,
-                Barcode = barcode,
                 ImageUrl = imageUrl,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -94,7 +92,6 @@ namespace InventoryManagement.Domain.Entities
             ReorderLevel = reorderLevel;
             MaxStockLevel = maxStockLevel;
             Unit = unit;
-            Barcode = barcode;
             ImageUrl = imageUrl;
             UpdatedAt = DateTime.UtcNow;
             UpdatedBy = updatedBy;

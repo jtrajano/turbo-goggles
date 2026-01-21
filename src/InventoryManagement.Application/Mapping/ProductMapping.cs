@@ -21,7 +21,6 @@ public static class ProductMapping
             ReorderLevel = product.ReorderLevel,
             MaxStockLevel = product.MaxStockLevel,
             Unit = product.Unit,
-            Barcode = product.Barcode,
             ImageUrl = product.ImageUrl,
             IsActive = product.IsActive,
             CreatedAt = product.CreatedAt,
