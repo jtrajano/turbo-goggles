@@ -14,8 +14,9 @@ public static class DependencyInjection
     {
         // Register infrastructure services, e.g., database context, repositories, etc.
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+            b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+            
         services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

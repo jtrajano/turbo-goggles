@@ -9,10 +9,10 @@ namespace InventoryManagement.Infrastructure.Repositories.Base;
 
 public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
 {
-    private ApplicationDbContext _context;
+    public IApplicationDbContext _context;
     protected DbSet<T> _db;
 
-    public BaseRepository(ApplicationDbContext context): this()
+    public BaseRepository(IApplicationDbContext context): this()
     {
         _context = context;
         _db = _context.Set<T>();

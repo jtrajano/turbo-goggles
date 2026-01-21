@@ -29,6 +29,11 @@ public static class ProductApis
             var result = await sender.Send(new SearchByTextQuery(text));
             return Results.Ok(result);
         });
+        //grp.MapPost("/", async ([FromQuery] string text, [FromServices] ISender sender) =>
+        //{
+        //    var result = await sender.Send(new SearchByTextQuery(text));
+        //    return Results.Ok(result);
+        //});
 
 
         grp.MapGet("/paging", async (

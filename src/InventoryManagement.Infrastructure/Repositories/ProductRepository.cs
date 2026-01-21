@@ -1,30 +1,41 @@
 ﻿using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Domain.Entities;
-using InventoryManagement.Infrastructure.Persistence;
 using InventoryManagement.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryManagement.Infrastructure.Repositories;
 
 public class ProductRepository : BaseRepository<Product>, IProductRepository
 {
-    public ProductRepository(ApplicationDbContext context) : base(context)
+    public ProductRepository(IApplicationDbContext _context) : base(_context)
     {
         
     }
 
-    public Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
+ 
+    public async Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _context.Products
+            .FirstOrDefaultAsync(p => p.SKU == sku, cancellationToken);
     }
-    public Task<bool> SkuExistsAsync(string sku, Guid? excludeId = null, CancellationToken cancellationToken = default)
+
+    public async Task<List<Product>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _context.Products
+            .OrderBy(p => p.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> SkuExistsAsync(string sku, Guid? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Products.Where(p => p.SKU == sku);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(p => p.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync(cancellationToken);
     }
     public async Task<IEnumerable<Product>> SearchByText(string text)
     {
