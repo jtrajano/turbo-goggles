@@ -30,21 +30,16 @@ public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
     {
         await _db.AddAsync(entity, cancellationToken);
-      
     }
 
-    public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    public void Update(T entity)
     {
         _db.Update(entity);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public void Delete(T entity)
     {
-        var entity = await GetByIdAsync(id, cancellationToken);
-        if (entity != null)
-        {
-            _db.Remove(entity);
-        }
+       _db.Remove(entity);
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
@@ -57,20 +52,5 @@ public class BaseRepository<T>() : IRepository<T> where T : class, IBaseEntity
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<T> items, int totalCount)> GetPagedAsync(
-        int pageNumber, 
-        int pageSize, 
-        Expression<Func<T, bool>>? filter,
-        CancellationToken ct = default)
-    {
-        var query = _db.AsNoTracking()
-            .Where(filter ?? (_ => true));
-
-        var result= await query.Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize).ToListAsync(ct);
-
-        var totalCount = await query.CountAsync();
-
-        return (result, totalCount);
-    }
+ 
 }

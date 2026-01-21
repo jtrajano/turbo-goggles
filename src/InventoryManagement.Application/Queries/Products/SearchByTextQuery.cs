@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Application.Interfaces;
+﻿using InventoryManagement.Application.DTOs;
+using InventoryManagement.Application.Interfaces;
 using InventoryManagement.Application.Mapping;
 using MediatR;
 

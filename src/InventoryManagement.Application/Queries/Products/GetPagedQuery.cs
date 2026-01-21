@@ -1,13 +1,8 @@
-﻿using InventoryManagement.Application.Mapping;
+﻿using InventoryManagement.Application.DTOs;
 using InventoryManagement.Application.Interfaces;
-using InventoryManagement.Domain;
-using InventoryManagement.Domain.Entities;
+using InventoryManagement.Application.Mapping;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Application.Queries.Products;
 
@@ -25,14 +20,8 @@ public sealed record PagedResult<T>(
 
 public record GetPagedQuery(PageRequest? Page = null) : IRequest<PagedResult<ProductDto>>;
 
-public class GetPagedQueryHandler : IRequestHandler<GetPagedQuery, PagedResult<ProductDto>>
+public class GetPagedQueryHandler(IApplicationDbContext _context) : IRequestHandler<GetPagedQuery, PagedResult<ProductDto>>
 {
-    private readonly IProductRepository _productRepository;
-
-    public GetPagedQueryHandler(IProductRepository productRepository)
-    {
-        _productRepository = productRepository;
-    }
 
     public async Task<PagedResult<ProductDto>> Handle(GetPagedQuery request, CancellationToken cancellationToken)
     {
@@ -42,13 +31,33 @@ public class GetPagedQueryHandler : IRequestHandler<GetPagedQuery, PagedResult<P
         var pageSize = Math.Max(page.pageSize, 1);
         var text = page.filter?.Trim() ?? string.Empty;
 
-        var result = await _productRepository.GetPagedAsync(pageNumber, pageSize, 
-            p => p.Name.ToLower().Contains(text), cancellationToken );
+        var result = await GetPagedAsync(pageNumber, pageSize, text, cancellationToken );
 
         return new PagedResult<ProductDto>(
-            result.items.Select(p=> p.ToDto()).ToList(), 
+            result.items.ToList(), 
             result.totalCount, 
             pageNumber, 
             pageSize);
+    }
+
+    private async Task<(IReadOnlyList<ProductDto> items, int totalCount)> GetPagedAsync(
+     int pageNumber,
+     int pageSize,
+     string text,
+     CancellationToken ct = default)
+    {
+        var query = _context.Products.AsNoTracking()
+            .Where(p => p.Name.ToLower().Contains(text));
+
+
+        var result = await query
+            .Select(p=>p.ToDto())
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        var totalCount = await query.CountAsync();
+
+        return (result, totalCount);
     }
 }
