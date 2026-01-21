@@ -1,4 +1,5 @@
-﻿using InventoryManagement.Application.Queries.Products;
+﻿using InventoryManagement.Application.Products.Commands;
+using InventoryManagement.Application.Queries.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,12 +30,22 @@ public static class ProductApis
             var result = await sender.Send(new SearchByTextQuery(text));
             return Results.Ok(result);
         });
-        //grp.MapPost("/", async ([FromQuery] string text, [FromServices] ISender sender) =>
-        //{
-        //    var result = await sender.Send(new SearchByTextQuery(text));
-        //    return Results.Ok(result);
-        //});
+        grp.MapPost("/", async ([FromBody] CreateProductCommand request, [FromServices] ISender sender) =>
+        {
+            var result = await sender.Send(request);
+            return Results.Ok(result);
+        });
+        grp.MapPut("/", async ([FromBody] UpdateProductCommand request, [FromServices] ISender sender) =>
+        {
+            var result = await sender.Send(request);
+            return Results.Ok(result);
+        });
 
+        grp.MapDelete("/", async ([FromBody] DeleteProductCommand request, [FromServices] ISender sender) =>
+        {
+            var result = await sender.Send(request);
+            return Results.Ok(result);
+        });
 
         grp.MapGet("/paging", async (
             [AsParameters] PageRequest param,

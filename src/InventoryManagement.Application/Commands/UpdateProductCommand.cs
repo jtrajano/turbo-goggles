@@ -6,7 +6,7 @@ using InventoryManagement.Domain.Entities;
 using InventoryManagement.Domain.Exceptions;
 using MediatR;
 
-namespace InventoryManagement.Application;
+namespace InventoryManagement.Application.Products.Commands;
 
 public record UpdateProductCommand : IRequest<ProductDto>
 {
