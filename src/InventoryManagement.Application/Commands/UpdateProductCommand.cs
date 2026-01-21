@@ -1,45 +1,74 @@
-﻿using InventoryManagement.Application.Interfaces;
+﻿using InventoryManagement.Application.DTOs;
+using InventoryManagement.Application.Interfaces;
+using InventoryManagement.Application.Mapping;
 using InventoryManagement.Domain;
 using InventoryManagement.Domain.Entities;
+using InventoryManagement.Domain.Exceptions;
 using MediatR;
 
 namespace InventoryManagement.Application;
 
-public record UpdateProductCommand(
-    Guid Id,
-    string Name,
-    string Description,
-    decimal Price,
-    int Stock
-) : IRequest<Result>;
-
-public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result>
+public record UpdateProductCommand : IRequest<ProductDto>
 {
-    private readonly IProductRepository _repository;
+    public Guid Id { get; init; }
+    public string SKU { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string Category { get; init; } = string.Empty;
+    public string? Supplier { get; init; }
+    public decimal UnitPrice { get; init; }
+    public decimal CostPrice { get; init; }
+    public int ReorderLevel { get; init; }
+    public int MaxStockLevel { get; init; }
+    public string? Unit { get; init; }
+    public string? Barcode { get; init; }
+    public string? ImageUrl { get; init; }
+    public bool IsActive { get; init; }
+}
 
-    public UpdateProductHandler(IProductRepository repository)
-    {
-        _repository = repository;
-    }
 
-    public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+
+public class UpdateProductCommandHandler(IProductRepository _productRepository) : IRequestHandler<UpdateProductCommand, ProductDto>
+{
+
+    public async Task<ProductDto> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (product == null)
-            return Result.Failure("Product not found");
+        {
+            throw new ProductNotFoundException(request.Id);
+        }
 
-        try
+        // Check if SKU already exists for another product
+        if (await _productRepository.SkuExistsAsync(request.SKU, request.Id, cancellationToken))
         {
-            // todo: implement update logic
-            //product.Update(request.Name, request.Description, request.Price, request.Stock);
-            await _repository.UpdateAsync(product, cancellationToken);
-            await _repository.SaveChangesAsync(cancellationToken);
-            return Result.Success();
+            throw new InvalidOperationException($"Product with SKU '{request.SKU}' already exists.");
         }
-        catch (ArgumentException ex)
-        {
-            return Result.Failure(ex.Message);
-        }
+
+        product.Update(
+            request.SKU,
+            request.Name,
+            request.Category,
+            request.UnitPrice,
+            request.CostPrice,
+            request.ReorderLevel,
+            request.MaxStockLevel,
+            request.Description,
+            request.Supplier,
+            request.Unit,
+            request.Barcode,
+            request.ImageUrl
+        );
+
+        if (request.IsActive)
+            product.Activate();
+        else
+            product.Deactivate();
+
+        _productRepository.Update(product);
+        await _productRepository.SaveChangesAsync(cancellationToken);
+
+        return product.ToDto();
     }
 }
